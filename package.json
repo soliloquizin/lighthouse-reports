@@ -10,8 +10,8 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "glob": "^7.1.6",
-    "lighthouse": "^7.3.0",
-    "yargs": "^16.2.0"
+    "glob": "7.2.0",
+    "lighthouse": "9.0.0",
+    "yargs": "17.2.1"
   }
 }
