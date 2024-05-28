@@ -1,27 +1,44 @@
-const lighthouse = require("lighthouse");
-const chromeLauncher = require("chrome-launcher");
-const argv = require("yargs").argv;
-const fs = require("fs");
-const glob = require("glob");
-const path = require("path");
+import lighthouse from "lighthouse";
+import * as chromeLauncher from "chrome-launcher";
+import fs from "fs";
+import yargs from "yargs";
+import { glob } from "glob";
+import path from "path";
 
-const runLighthouseInChrome = url => {
-  return chromeLauncher.launch().then(chrome => {
+/* const runLighthouseInChrome = (url) => {
+  return chromeLauncher.launch().then((chrome) => {
     const opts = {
-      port: chrome.port
+      port: chrome.port,
     };
-    return lighthouse(url, opts).then(results => {
+    return lighthouse(url, opts).then((results) => {
       return chrome.kill().then(() => {
         return {
           js: results.lhr,
-          json: results.report
+          json: results.report,
         };
       });
     });
   });
+}; */
+const runLighthouseInChrome = async (url) => {
+  const chrome = await chromeLauncher.launch({ chromeFlags: ["--headless"] });
+  const options = {
+    logLevel: "info",
+    output: "json",
+    onlyCategories: ["performance"],
+    port: chrome.port,
+  };
+  const runnerResult = await lighthouse(url, options);
+  const result = {
+    js: runnerResult.lhr,
+    json: runnerResult.report,
+  };
+
+  chrome.kill();
+  return result;
 };
 
-const getContents = pathStr => {
+const getContents = (pathStr) => {
   const output = fs.readFileSync(pathStr, "utf8", (err, results) => {
     return results;
   });
@@ -46,7 +63,7 @@ const compareReports = (from, to) => {
     "max-potential-fid",
     "time-to-first-byte",
     "total-blocking-time",
-    "estimated-input-latency"
+    "estimated-input-latency",
   ];
 
   for (let auditObj in from["audits"]) {
@@ -78,6 +95,8 @@ const compareReports = (from, to) => {
   }
 };
 
+const argv = yargs(process.argv.slice(2)).parse();
+
 if (argv.url) {
   const urlObj = new URL(argv.url);
   let baseDir = urlObj.host.replace("www.", "");
@@ -97,9 +116,9 @@ if (argv.url) {
     }
   }
 
-  runLighthouseInChrome(argv.url).then(results => {
+  runLighthouseInChrome(argv.url).then((results) => {
     const prevReports = glob(`${targetDir}/*.json`, {
-      sync: true
+      sync: true,
     });
 
     if (prevReports.length) {
@@ -122,7 +141,7 @@ if (argv.url) {
     fs.writeFile(
       `${targetDir}/${results.js["fetchTime"].replace(/:/g, "_")}.json`,
       results.json,
-      err => {
+      (err) => {
         if (err) {
           throw err;
         }
@@ -136,7 +155,7 @@ if (argv.url) {
   );
 } else if (argv.latest) {
   const prevReports = glob(`${argv.latest}/*.json`, {
-    sync: true
+    sync: true,
   });
 
   if (prevReports.length > 1) {

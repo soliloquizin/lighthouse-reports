@@ -1,6 +1,7 @@
 {
   "name": "lighthouse-reports",
   "version": "1.0.0",
+  "type": "module",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -10,8 +11,8 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "glob": "7.2.0",
-    "lighthouse": "9.0.0",
-    "yargs": "17.2.1"
+    "glob": "10.4.1",
+    "lighthouse": "12.0.0",
+    "yargs": "17.7.2"
   }
 }
