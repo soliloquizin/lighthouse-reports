@@ -5,30 +5,14 @@ import yargs from "yargs";
 import { glob } from "glob";
 import path from "path";
 
-/* const runLighthouseInChrome = (url) => {
-  return chromeLauncher.launch().then((chrome) => {
-    const opts = {
-      port: chrome.port,
-    };
-    return lighthouse(url, opts).then((results) => {
-      return chrome.kill().then(() => {
-        return {
-          js: results.lhr,
-          json: results.report,
-        };
-      });
-    });
-  });
-}; */
-const runLighthouseInChrome = async (url) => {
+const runLighthouseInChrome = async (url, config) => {
   const chrome = await chromeLauncher.launch({ chromeFlags: ["--headless"] });
   const options = {
     logLevel: "info",
     output: "json",
-    onlyCategories: ["performance"],
     port: chrome.port,
   };
-  const runnerResult = await lighthouse(url, options);
+  const runnerResult = await lighthouse(url, options, config);
   const result = {
     js: runnerResult.lhr,
     json: runnerResult.report,
@@ -116,7 +100,17 @@ if (argv.url) {
     }
   }
 
-  runLighthouseInChrome(argv.url).then((results) => {
+  let config;
+  try {
+    if (fs.existsSync("./configs/" + baseDir + ".js")) {
+      const configModule = await import("./configs/" + baseDir + ".js");
+      config = configModule.default;
+    }
+  } catch (error) {
+    console.error("Unable to load config.", error);
+  }
+
+  runLighthouseInChrome(argv.url, config).then((results) => {
     const prevReports = glob(`${targetDir}/*.json`, {
       sync: true,
     });
