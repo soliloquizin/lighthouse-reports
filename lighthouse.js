@@ -87,16 +87,16 @@ if (argv.url) {
   let subDir;
   let targetDir = baseDir;
 
-  if (!fs.existsSync(baseDir)) {
-    fs.mkdirSync(baseDir);
+  if (!fs.existsSync("reports/" + baseDir)) {
+    fs.mkdirSync("reports/" + baseDir);
   }
 
   if (urlObj.pathname !== "/") {
     subDir = urlObj.pathname.substring(1).replace(/\//g, "_");
     targetDir += "/" + subDir;
 
-    if (!fs.existsSync(baseDir + "/" + subDir)) {
-      fs.mkdirSync(baseDir + "/" + subDir);
+    if (!fs.existsSync("reports/" + baseDir + "/" + subDir)) {
+      fs.mkdirSync("reports/" + baseDir + "/" + subDir);
     }
   }
 
@@ -133,7 +133,7 @@ if (argv.url) {
     }
 
     fs.writeFile(
-      `${targetDir}/${results.js["fetchTime"].replace(/:/g, "_")}.json`,
+      `reports/${targetDir}/${results.js["fetchTime"].replace(/:/g, "_")}.json`,
       results.json,
       (err) => {
         if (err) {
